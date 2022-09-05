@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\Produk;
 class WebController extends Controller
 {
     public function index(Request $request)
@@ -23,6 +24,18 @@ class WebController extends Controller
             // Set 3DS transaction for credit card to true
             \Midtrans\Config::$is3ds = true;
             
+            // with database
+            $data_item = Produk::get();
+            foreach ($data_item as $div) 
+            {
+                $item_details[] = [
+                    'id' => $div->id,
+                    'price' => $div->price,
+                    'quantity' => 1,
+                    'name' => $div->name
+                ] ;  
+            }
+
             $params = array(
                 // transaksi 
                 'transaction_details' => array(
@@ -30,6 +43,11 @@ class WebController extends Controller
                     'gross_amount' => 18000,
                 ),
                 // transaksi detail/item 
+
+                // with database
+                // 'item_details' => $item_details,
+                
+                // example
                 'item_details' => array(
                     [
                         'id' => 'a1',
@@ -52,7 +70,7 @@ class WebController extends Controller
                     'phone' => $request->get('number'),
                 ),
             );
-            
+            // dd($params);
             $snapToken = \Midtrans\Snap::getSnapToken($params);
             // dd($snapToken);
             return view('web.payment', compact('snapToken'));
